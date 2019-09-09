@@ -6,6 +6,8 @@ How to execute server-side code to populate databases:
   
   These commands must be executed in this exact order since data must be retireved before it can be utilized 
 
+
+
 How to Run Web App:
 
   1.) Run Flask app (python app.py) make sure to run on 8080
