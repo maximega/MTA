@@ -1,4 +1,12 @@
+How to execute server-side code to populate databases:
+  
+  1.) python run.py get_data
+  2.) python run.py merge_data
+  
+  These commands must be executed in this exact order since data must be retireved before it can be utilized 
+
 How to Run Web App:
+
   1.) Run Flask app (python app.py) make sure to run on 8080
   2.) Open a chrome browser with security disabled (CORS issue):
 
@@ -8,29 +16,6 @@ How to Run Web App:
   3.) Open index.html inside that chrome browser (whole AngularJS front end is in this file; all js libraries are accessed with CDN's)  
   4.) If that doesn't work, either try quitting chrome, or using Firefox with a CORS plugin
 
-Data Sets Used:
-
-  https://api.datausa.io/api/?sort=desc&show=geo&required=income&sumlevel=tract&year=all&where=geo%3A16000US3651000
-  http://datamechanics.io/data/maximega_tcorc/NYC_census_tracts.csv
-  http://datamechanics.io/data/maximega_tcorc/NYC_subway_exit_entrance.csv
-  https://data.cityofnewyork.us/resource/swpk-hqdp.json     
-  https://data.cityofnewyork.us/resource/q2z5-ai38.json
-  
-Data Portals Used:
-
-   https://data.cityofnewyork.us/       
-   https://datamechanics.io/       
-   https://datausa.io       
-   
-Non-trivial Data Transformations:
-
-  1: Merging economic with geographical census information, creating a new data set that has a census tract as a key and (average income per tract, neighborhood that the tract belongs to, and multipolygon coordinates) as a value.
-  
-  2: Merging subway station information with neighborhood (NTA) information, creating a new data set that has an NTA code as a key and (multipolygon coordinates, and (station name, subway line, and coordinates (lat, long) of the station) as a value.
-  
-  3: Merging neighborhood population information with (2), creating a new data set that has an NTA code as a key, and (name, multipolygon coordinates, station information, and population) as a value.
- 
-  4: Merging (1) with (3), creating a new data set that has an NTA code as a key, and a (name, station information, and population, and census information) as a value.
   
 Problem to Solve:
   
@@ -53,7 +38,3 @@ Statistical Analysis:
 
   For statistical analysis, we computed the correlation coefficient and p-value between the average income and the corresponding percent of the population of that neighborhood using the subway. We found that they were negatively correlated, seeing as our p value was greater than the coefficient. Therefore, as the average income increases, the percent of people using subway decreases. To find out whether or not this was significant, we computed the absolute value of the coefficient and compared it to our p-value. Seeing as our p-value was lower than that absolute value, our coefficient was significant. 
   
-
-Trial Mode for Project #2:
-  
-  In kmeans_opt.py
