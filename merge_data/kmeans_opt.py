@@ -1,7 +1,6 @@
 import urllib.request
 import json
-import dml
-import prov.model
+import pymongo
 import datetime
 import uuid
 from sklearn.cluster import KMeans
@@ -15,27 +14,21 @@ from merge_data.helper_functions.cons_sat import cons_sat
 
 
 
-class kmeans_opt(dml.Algorithm):
-	contributor = 'maximega_tcorc'
-	reads = ['maximega_tcorc.income_with_NTA_with_percentages']
-	writes = ['maximega_tcorc.new_zone_fares']
+class kmeans_opt():
+	reads = ['mta.income_with_NTA_with_percentages']
+	writes = ['mta.new_zone_fares']
 	
 	@staticmethod
-	def execute(trial = False):
+	def execute():
 		startTime = datetime.datetime.now()
 
 		repo_name = kmeans_opt.writes[0]
 		# ----------------- Set up the database connection -----------------
-		client = dml.pymongo.MongoClient()
+		client = pymongo.MongoClient()
 		repo = client.repo
-		repo.authenticate('maximega_tcorc', 'maximega_tcorc')
 
 		# -----------------Retrieve neighborhood data from Mongodb -----------------
-		nta_objects = repo.maximega_tcorc.income_with_NTA_with_percentages.find()
-
-		# ----------------- If the trial flag is set, only use a small sample of the data -----------------
-		if trial:
-			nta_objects = nta_objects[0:50]
+		nta_objects = repo.mta.income_with_NTA_with_percentages.find()
 
 		incomes = []
 		pops = []
@@ -97,11 +90,9 @@ class kmeans_opt(dml.Algorithm):
 
 
 			#----------------- Data insertion into Mongodb ------------------
-			repo.dropCollection('new_zone_fares')
-			repo.createCollection('new_zone_fares')
+			repo.drop_collection(repo_name)
+			repo.create_collection(repo_name)
 			repo[repo_name].insert_many(data_copy)
-			repo[repo_name].metadata({'complete':True})
-			print(repo[repo_name].metadata())
 
 			repo.logout()
 
@@ -109,45 +100,4 @@ class kmeans_opt(dml.Algorithm):
 			print("Constraints Were Not Satisfied")
 		endTime = datetime.datetime.now()
 
-		return {"start":startTime, "end":endTime}
-
-	@staticmethod
-	def provenance(doc = prov.model.ProvDocument(), startTime = None, endTime = None):
-		'''
-			Create the provenance document describing everything happening
-			in this script. Each run of the script will generate a new
-			document describing that invocation event.
-		'''
-
-		# Set up the database connection.
-		client = dml.pymongo.MongoClient()
-		repo = client.repo
-		repo.authenticate('maximega_tcorc', 'maximega_tcorc')
-		doc.add_namespace('alg', 'http://datamechanics.io/algorithm/') # The scripts are in <folder>#<filename> format.
-		doc.add_namespace('dat', 'http://datamechanics.io/data/') # The data sets are in <user>#<collection> format.
-		doc.add_namespace('ont', 'http://datamechanics.io/ontology#') # 'Extension', 'DataResource', 'DataSet', 'Retrieval', 'Query', or 'Computation'.
-		doc.add_namespace('log', 'http://datamechanics.io/log/') # The event log.
-
-		#agent
-		this_script = doc.agent('alg:maximega_tcorc#kmeans_opt', {prov.model.PROV_TYPE:prov.model.PROV['SoftwareAgent'], 'ont:Extension':'py'})
-		#resource
-		nta_objects = doc.entity('dat:maximega_tcorc#income_with_NTA_with_percentages', {prov.model.PROV_LABEL:'Income with NTA with Percentages', prov.model.PROV_TYPE:'ont:DataSet'})
-		#agent
-		running_k_means_cons_sat = doc.activity('log:uuid'+str(uuid.uuid4()), startTime, endTime)
-
-		doc.wasAssociatedWith(running_k_means_cons_sat, this_script)
-
-		doc.usage(running_k_means_cons_sat, nta_objects, startTime, None,
-					{prov.model.PROV_TYPE:'ont:Computation'
-					}
-					)
-		#reasource
-		categorized_ntas = doc.entity('dat:maximega_tcorc#categorized_ntas', {prov.model.PROV_LABEL:'Categorized NTAS', prov.model.PROV_TYPE:'ont:DataSet'})
-		
-		doc.wasAttributedTo(categorized_ntas, this_script)
-		doc.wasGeneratedBy(categorized_ntas, running_k_means_cons_sat, endTime)
-		doc.wasDerivedFrom(categorized_ntas, nta_objects, running_k_means_cons_sat, running_k_means_cons_sat, running_k_means_cons_sat)
-
-		repo.logout()
-				
-		return doc
+		print(repo_name, "completed")

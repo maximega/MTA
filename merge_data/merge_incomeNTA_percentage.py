@@ -1,28 +1,25 @@
-import urllib.request
-import json
-import dml
-import prov.model
 import datetime
+import json
+import pymongo
+import urllib.request
 import uuid
 
-class merge_incomeNTA_percentage(dml.Algorithm):
-    contributor = 'maximega_tcorc'
-    reads = ['maximega_tcorc.transportation_percentages', 'maximega_tcorc.income_with_neighborhoods']
-    writes = ['maximega_tcorc.income_with_NTA_with_percentages']
+class merge_incomeNTA_percentage():
+    reads = ['mta.transportation_percentages', 'mta.income_with_neighborhoods']
+    writes = ['mta.income_with_NTA_with_percentages']
     
     @staticmethod
-    def execute(trial = False):
+    def execute():
         startTime = datetime.datetime.now()
 
         repo_name = merge_incomeNTA_percentage.writes[0]
         # ----------------- Set up the database connection -----------------
-        client = dml.pymongo.MongoClient()
+        client = pymongo.MongoClient()
         repo = client.repo
-        repo.authenticate('maximega_tcorc', 'maximega_tcorc')
 
         # ----------------- Retrieve data from Mongodb -----------------
-        trans_percent = repo.maximega_tcorc.transportation_percentages
-        income_NTA = repo.maximega_tcorc.income_with_neighborhoods
+        trans_percent = repo.mta.transportation_percentages
+        income_NTA = repo.mta.income_with_neighborhoods
         
         # ----------------- Merge Census Tract incomes with NTA info, aggregate and average incomes for NTA -----------------
         insert_many_arr = []
@@ -46,18 +43,12 @@ class merge_incomeNTA_percentage(dml.Algorithm):
             })
 
         #----------------- Data insertion into Mongodb ------------------
-        repo.dropCollection('income_with_NTA_with_percentages')
-        repo.createCollection('income_with_NTA_with_percentages')
+        repo.drop_collection(repo_name)
+        repo.create_collection(repo_name)
         repo[repo_name].insert_many(insert_many_arr)
-        repo[repo_name].metadata({'complete':True})
-        print(repo[repo_name].metadata())
 
         repo.logout()
 
         endTime = datetime.datetime.now()
 
-        return {"start":startTime, "end":endTime}
-
-    @staticmethod
-    def provenance(doc = prov.model.ProvDocument(), startTime = None, endTime = None):
-        return None
+        print(repo_name, "completed")

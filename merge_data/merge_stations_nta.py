@@ -1,16 +1,14 @@
-import urllib.request
-import json
-import dml
-import prov.model
 import datetime
+import json
+import pymongo
+import urllib.request
 import uuid
 from merge_data.helper_functions.within_polygon import point_inside_polygon
 
 
-class merge_stations_nta(dml.Algorithm):
-	contributor = 'maximega_tcorc'
-	reads = ['maximega_tcorc.stations', 'maximega_tcorc.neighborhoods']
-	writes = ['maximega_tcorc.neighborhoods_with_stations']
+class merge_stations_nta():
+	reads = ['mta.stations', 'mta.neighborhoods']
+	writes = ['mta.neighborhoods_with_stations']
 	
 	@staticmethod
 	def execute(trial = False):
@@ -18,12 +16,11 @@ class merge_stations_nta(dml.Algorithm):
 
 		repo_name = merge_stations_nta.writes[0]
 		# ----------------- Set up the database connection -----------------
-		client = dml.pymongo.MongoClient()
+		client = pymongo.MongoClient()
 		repo = client.repo
-		repo.authenticate('maximega_tcorc', 'maximega_tcorc')
 
-		stations = repo.maximega_tcorc.stations.find()
-		ntas = repo.maximega_tcorc.neighborhoods.find()
+		stations = repo.mta.stations.find()
+		ntas = repo.mta.neighborhoods.find()
 
 		duplicates = []
 		filtered_stations = []
@@ -88,18 +85,12 @@ class merge_stations_nta(dml.Algorithm):
 			insert_many_arr.append(nta_objects[key])
 
 		#----------------- Data insertion into Mongodb ------------------
-		repo.dropCollection('neighborhoods_with_stations')
-		repo.createCollection('neighborhoods_with_stations')
+		repo.drop_collection(repo_name)
+		repo.create_collection(repo_name)
 		repo[repo_name].insert_many(insert_many_arr)
-		repo[repo_name].metadata({'complete':True})
-		print(repo[repo_name].metadata())
 
 		repo.logout()
 
 		endTime = datetime.datetime.now()
 
-		return {"start":startTime, "end":endTime}
-
-	@staticmethod
-	def provenance(doc = prov.model.ProvDocument(), startTime = None, endTime = None):
-		return None
+		print(repo_name, "completed")
