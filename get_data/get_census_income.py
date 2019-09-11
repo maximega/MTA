@@ -1,25 +1,24 @@
-import urllib.request
-import json
-import dml
-import prov.model
 import datetime
-import uuid
+import json
 import pandas as pd
+import prov.model
+import pymongo
+import urllib.request
+import uuid
 
-class get_census_income(dml.Algorithm):
-    contributor = 'maximega_tcorc'
+
+class get_census_income():
     reads = []
-    writes = ['maximega_tcorc.census_income']
+    writes = ['mta.census_income']
 
     @staticmethod
-    def execute(trial = False):
+    def execute():
         startTime = datetime.datetime.now()
 
         repo_name = get_census_income.writes[0]
         # ----------------- Set up the database connection -----------------
-        client = dml.pymongo.MongoClient()
+        client = pymongo.MongoClient()
         repo = client.repo
-        repo.authenticate('maximega_tcorc', 'maximega_tcorc')
         
         # ------------------ Data retrieval ---------------------
         url = 'https://api.datausa.io/api/?sort=desc&show=geo&required=income&sumlevel=tract&year=2016&where=geo%3A16000US3651000'
@@ -40,21 +39,12 @@ class get_census_income(dml.Algorithm):
             })
 
         # ----------------- Data insertion into Mongodb ------------------
-        repo.dropCollection('census_income')
-        repo.createCollection('census_income')
+        repo.drop_collection(repo_name)
+        repo.create_collection(repo_name)
         repo[repo_name].insert_many(insert_many_arr)
-        repo[repo_name].metadata({'complete':True})
-        print(repo[repo_name].metadata())
         
         repo.logout()
 
         endTime = datetime.datetime.now()
-
-        return {"start":startTime, "end":endTime}
-
-    @staticmethod
-    def provenance(doc = prov.model.ProvDocument(), startTime = None, endTime = None):
-        return None
-
-
-
+        
+        print(repo_name, "completed")
