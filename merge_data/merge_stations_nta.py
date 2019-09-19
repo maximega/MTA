@@ -3,7 +3,7 @@ import json
 import pymongo
 import urllib.request
 import uuid
-from merge_data.helper_functions.within_polygon import point_inside_polygon
+from utils.helper_functions.within_polygon import point_inside_polygon
 
 
 class merge_stations_nta():

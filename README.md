@@ -1,10 +1,12 @@
 How to execute server-side code to populate databases:
   
-    1.) python run.py get_data
+    1.) python run_dir.py get_data
 
-    2.) python run.py merge_data
+    2.) python run_dir.py merge_data
+
+    3.) python run_dir.py optimize_data
   
-    These commands must be executed in this exact order since data must be retireved before it can be utilized 
+    These commands must be executed in this exact order since the execution algorithm ensures that collections are not read from before they are created
 
 
 
