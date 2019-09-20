@@ -1,4 +1,3 @@
-import datetime
 import json
 import pandas as pd
 import pymongo
@@ -11,8 +10,6 @@ class get_transportation_percentages():
 
     @staticmethod
     def execute():
-        startTime = datetime.datetime.now()
-
         repo_name = get_transportation_percentages.writes[0]
         # ----------------- Set up the database connection -----------------
         client = pymongo.MongoClient()
@@ -30,7 +27,4 @@ class get_transportation_percentages():
         repo[repo_name].insert_many(json_response)
         
         repo.logout()
-
-        endTime = datetime.datetime.now()
-
         print(repo_name, "completed")

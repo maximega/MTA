@@ -1,16 +1,14 @@
+import matplotlib.pyplot as matplot
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as matplot
 import sklearn
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.metrics import pairwise_distances_argmin_min
-from sklearn.metrics.pairwise import euclidean_distances
-import matplotlib.pyplot as plt
-
-from sklearn.cluster import KMeans
-
-import json
 from sklearn import preprocessing 
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.metrics.pairwise import euclidean_distances
+
+
 
 def createScatter(df):
     matplot.subplot(1,2,1)

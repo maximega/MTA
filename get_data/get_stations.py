@@ -11,8 +11,6 @@ class get_stations():
 
     @staticmethod
     def execute():
-        startTime = datetime.datetime.now()
-
         repo_name = get_stations.writes[0]
         # ----------------- Set up the database connection -----------------
         client = pymongo.MongoClient()
@@ -30,7 +28,4 @@ class get_stations():
         repo[repo_name].insert_many(json_response)
         
         repo.logout()
-
-        endTime = datetime.datetime.now()
-
         print(repo_name, "completed")

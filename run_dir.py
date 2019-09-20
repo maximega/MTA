@@ -12,36 +12,39 @@ args = parser.parse_args()
 
 get_data_reads = set()
 merge_data_reads = set(['mta.census_income', 'mta.census_tracts', 'mta.neighborhoods', 'mta.population', 'mta.stations', 'mta.transportation_percentages'])
-optimize_data_reads = set(['mta.income_with_NTA_with_percentages'])
 
 # ----------------- Extract the algorithm classes from the modules in the specified subdirectory -----------------
 subdir = args.contributor_folder
 debug = args.debug
 algorithms = []
 for r,d,f in os.walk(subdir):
-    for file in f:
-        if r.find(os.sep) == -1 and file.split(".")[-1] == "py":
-            if debug:
-                if file in debug:
+    if '__pycache__' not in r:
+        for file in f:
+            if os.path.isdir(r):
+                if r.rfind('/') == -1:
+                    subdir_temp = r
+                else:
+                    index = r.rfind('/') + 1
+                    temp_dir = r[index:]
+                    subdir_temp += '.' + temp_dir
+            if file.split(".")[-1] == "py" and file != '__init__.py':
+                if debug:
+                    if file in debug:
+                        name_module = ".".join(file.split(".")[0:-1])
+                        module = importlib.import_module(subdir_temp + "." + name_module)
+                        algorithms.append(module.__dict__[name_module])
+                else:
                     name_module = ".".join(file.split(".")[0:-1])
-                    module = importlib.import_module(subdir + "." + name_module)
+                    module = importlib.import_module(subdir_temp + "." + name_module)
                     algorithms.append(module.__dict__[name_module])
-            else:
-                name_module = ".".join(file.split(".")[0:-1])
-                module = importlib.import_module(subdir + "." + name_module)
-                algorithms.append(module.__dict__[name_module])
 
-
-# ----------------- This creates a correct ordering of execution when running algs in this exact ordering get_data -> merge_data -> optimize_data -----------------
+# ----------------- This creates a correct ordering of execution when running algs in this exact ordering get_data -> merge_data -----------------
 datasets = set()
 if subdir == 'get_data':
     datasets = get_data_reads
 
 elif subdir == 'merge_data':
     datasets = merge_data_reads
-
-elif subdir == 'optimize_data':
-    datasets = optimize_data_reads
 
 ordered = []
 print()

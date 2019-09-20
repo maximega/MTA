@@ -1,4 +1,3 @@
-import datetime
 import json
 import pymongo
 import urllib.request
@@ -10,8 +9,6 @@ class get_population():
 
     @staticmethod
     def execute(trial = False):
-        startTime = datetime.datetime.now()
-
         repo_name = get_population.writes[0]
         # ----------------- Set up the database connection -----------------
         client = pymongo.MongoClient()
@@ -31,7 +28,4 @@ class get_population():
         repo[repo_name].insert_many(json_response)
         
         repo.logout()
-
-        endTime = datetime.datetime.now()
-
         print(repo_name, "completed")
