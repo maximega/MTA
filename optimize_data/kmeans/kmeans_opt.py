@@ -1,16 +1,16 @@
-import urllib.request
-import json
-import pymongo
 import datetime
-import uuid
-from sklearn.cluster import KMeans
-import numpy as np
+import json
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas
 from pandas.plotting import parallel_coordinates
+import pymongo
+from sklearn.cluster import KMeans
+import urllib.request
+import uuid
 
-from merge_data.helper_functions.lat_long_kmeans import run_lat_long_kmeans
-from merge_data.helper_functions.cons_sat import cons_sat
+from utils.helper_functions.lat_long_kmeans import run_lat_long_kmeans
+from utils.helper_functions.cons_sat import cons_sat
 
 
 
@@ -18,8 +18,9 @@ class kmeans_opt():
 	reads = ['mta.income_with_NTA_with_percentages']
 	writes = ['mta.new_zone_fares']
 	
-	@staticmethod
-	def execute():
+	@staticmethod 
+	def execute(zones = 5,  percent_max = .2, percent_min = .01, factor = 1.4, app = False):
+		# ----------------- A k of 5 (5 zones) derived from error graph in kmeans file -----------------
 		startTime = datetime.datetime.now()
 
 		repo_name = kmeans_opt.writes[0]
@@ -43,17 +44,14 @@ class kmeans_opt():
 				incomes.append(income)
 				pops.append(nta['trans_percent'])
 
-		# ----------------- k =5 derived from error graph in kmeans file -----------------
-		k = 5
-
 		#------------------ Run k Means on ([lat, long], avg_income) -----------------
-		kmeans = run_lat_long_kmeans(X, k)
+		kmeans = run_lat_long_kmeans(X, zones)
 
 		k_groupings = kmeans.labels_
 		for i in range(len(data_copy)):
 			data_copy[i]['zone'] = k_groupings[i]
-		avg_inc = [0] * k
-		count_inc = [0] * k
+		avg_inc = [0] * zones
+		count_inc = [0] * zones
 
 		# ----------------- Find and insert average income for each zone -----------------
 		for item in data_copy:
@@ -64,15 +62,15 @@ class kmeans_opt():
 		for i in range(len(data_copy)):
 			data_copy[i]['avg_inc'] = avg_inc[data_copy[i]['zone']]
 		# ----------------- Reorder the zones based on avg_zone_income (income zone1 > income zone 2 ...) -----------------
-		for i in range(1, k +1):
+		for i in range(1, zones +1):
 			max_avg = max(avg_inc)
 			for item in data_copy:
 				if (item['avg_inc'] == max_avg):
 					item['zone'] = i
 			avg_inc.remove(max_avg)
 		# ----------------- Use z3 to find new zone fares that satisfy constraint set -----------------	
-		new_fares = cons_sat(data_copy, k)
-		print(new_fares)
+		new_fares = cons_sat(data_copy, zones, percent_max, percent_min, factor)
+		
 		# ----------------- If constraint set was not satisfied, do not insert into mongodb -----------------
 		if (new_fares != 'unsat'):
 			# ----------------- Insert new zone fares into Mongodb -----------------
@@ -88,16 +86,20 @@ class kmeans_opt():
 						obj[key] = x
 						item['routes'].append(obj)
 
-
+			#TODO: Do Not drop repo every time, isntead save each run with a unique identifier
 			#----------------- Data insertion into Mongodb ------------------
-			repo.drop_collection(repo_name)
-			repo.create_collection(repo_name)
-			repo[repo_name].insert_many(data_copy)
-
-			repo.logout()
+			if (app):
+				return data_copy
+			else:
+				repo.drop_collection(repo_name)
+				repo.create_collection(repo_name)
+				repo[repo_name].insert_many(data_copy)
+				repo.logout()
 
 		if (new_fares == 'unsat'):
 			print("Constraints Were Not Satisfied")
+			if(app):
+				return []
 		endTime = datetime.datetime.now()
 
 		print(repo_name, "completed")

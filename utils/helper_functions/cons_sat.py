@@ -1,11 +1,11 @@
 import z3
 
-def cons_sat(data_copy, k):
+def cons_sat(data_copy, zones, percent_max, percent_min, factor):
     # ----------------- Each parameter will look like this (r1-1, r1-2, ..., rk-k) -----------------
     # ----------------- For example, r2-4 represents a route where the rider mey exit/enter in zone 2 and exit/enter in zone 4 -----------------
     parameter_names_z = []
-    for i in range(1, k + 1):
-        for j in range(i, k + 1):
+    for i in range(1, zones + 1):
+        for j in range(i, zones + 1):
             val = "r{0:d}".format(i)
             val += "-{0:d}".format(j)
             parameter_names_z.append(val)
@@ -38,7 +38,7 @@ def cons_sat(data_copy, k):
     for i in range(len(parameters_z)):
         val = (parameters_z[i] * projected_route_total[i])/real_route_total
         # ----------------- Enusre new fares dont make one route responsible for more than 20% of revenue or less than 1% revenue -----------------
-        S.add(val < .2, val > .01)
+        S.add(val < percent_max, val > percent_min)
 
     # ----------------- Ensure that routes between two zones with lower avg incomes pay less than routes between two zones with higher average income -----------------
     for i in range(len(parameters_z)):
@@ -55,7 +55,7 @@ def cons_sat(data_copy, k):
                 S.add(parameters_z[i] < parameters_z[j])
 
     # ----------------- Ensure that the most expesnive route (r1-1) is at most 1.4 times the cheapest route (r5-5) -----------------
-    S.add(parameters_z[-1] * 1.4 > parameters_z[0])
+    S.add(parameters_z[-1] * factor > parameters_z[0])
 
     if str(S.check()) == 'unsat':
         return 'unsat'

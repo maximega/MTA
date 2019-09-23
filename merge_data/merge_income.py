@@ -1,4 +1,3 @@
-import datetime
 import json
 import pymongo
 import urllib.request
@@ -10,8 +9,6 @@ class merge_income():
 	
 	@staticmethod
 	def execute():
-		startTime = datetime.datetime.now()
-
 		repo_name = merge_income.writes[0]
 		# ----------------- Set up the database connection -----------------
 		client = pymongo.MongoClient()
@@ -49,7 +46,4 @@ class merge_income():
 		repo[repo_name].insert_many(insert_many_arr)
 
 		repo.logout()
-
-		endTime = datetime.datetime.now()
-
 		print(repo_name, "completed")

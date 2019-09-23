@@ -1,9 +1,8 @@
-import datetime
 import json
 import pymongo
 import urllib.request
 import uuid
-from merge_data.helper_functions.within_polygon import point_inside_polygon
+from utils.helper_functions.within_polygon import point_inside_polygon
 
 
 class merge_stations_nta():
@@ -12,8 +11,6 @@ class merge_stations_nta():
 	
 	@staticmethod
 	def execute(trial = False):
-		startTime = datetime.datetime.now()
-
 		repo_name = merge_stations_nta.writes[0]
 		# ----------------- Set up the database connection -----------------
 		client = pymongo.MongoClient()
@@ -90,7 +87,4 @@ class merge_stations_nta():
 		repo[repo_name].insert_many(insert_many_arr)
 
 		repo.logout()
-
-		endTime = datetime.datetime.now()
-
 		print(repo_name, "completed")
