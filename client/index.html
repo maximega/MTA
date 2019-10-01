@@ -138,7 +138,7 @@
               $http.get(url)
                 .then(function(response) {
                       var data = response.data;
-                      console.log(response);
+                      //nta's that have multiple land masses, and require multiple polygons
                       if(data.length == 0){
                         $scope.showErr = true;
                         return;
@@ -146,8 +146,12 @@
                       $scope.showErr = false;
                       initialize();
                       var nta_multipolygon = [];
+                      var multi_shape = ['Pelham Bay-Country Club-City Island', 'Lenox Hill-Roosevelt Island', 'Breezy Point-Belle Harbor-Rockaway Park-Broad Channel'];
                       for(var i = 0; i < data.length; i++){
                         data[i]['polygon'] = [];
+                        if (multi_shape.includes(data[i]['ntaname'])){
+                          console.log(data[i])
+                        }
                         // neighborhood points were in a weird format, so this is just 
                         // flattening and getting into google maps format
                         for(var j = 0; j < data[i]['geom'].length; j++){

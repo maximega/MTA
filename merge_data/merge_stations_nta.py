@@ -21,6 +21,8 @@ class merge_stations_nta():
 		q_train = repo.mta.q_train.find({"LINE" : "Q"})
 
 		#TODO: Fix Pelham Bay-Country Club-City Island, Lenox Hill-Roosevelt Island, Breezy Point-Belle Harbor-Rockaway Park-Broad Channel multi polygon representation
+
+		todo = ['Pelham Bay-Country Club-City Island', 'Lenox Hill-Roosevelt Island', 'Breezy Point-Belle Harbor-Rockaway Park-Broad Channel']
 		polygon_errors = ['Lower East Side', 'Battery Park City-Lower Manhattan', 'Murray Hill-Kips Bay', 'Mott Haven-Port Morris', 'East Harlem North', 'Yorkville']
 		extensions = ['72nd St', '86th St', '96th St']
 		duplicates = []
@@ -34,24 +36,24 @@ class merge_stations_nta():
 				filtered_stations.append(station)
 
 		nta_objects = {}
-		nta_count = 0
-		station_count = 0
 		# ----------------- Extract the locations of Q-train 2017 stop extensions and add to 2015 stations db  -----------------
 		for stop in q_train:
 			if stop['NAME'] in extensions:
+				#print(stop)
 				stop['Station Name'] = stop['NAME']
-				temp = stop['the_geom'][6:].replace(' ', ', ')
+				temp = stop['the_geom'][7:]
 				lat_coord = ''
 				long_coord = ''
 				i = 1
-				while(temp[i] != ','):
+				while(temp[i] != ' '):
 					lat_coord += temp[i]
 					i += 1
-				i += 2
+				i += 1
 				while(temp[i] != ')'):
 					long_coord += temp[i]
 					i += 1
-
+				stop['Station Latitude'] = float(lat_coord)
+				stop['Station Longitude'] = float(long_coord)
 				stop['Station Location'] = "(" + long_coord + ", " + lat_coord + ")"
 				filtered_stations.append(stop)
 
@@ -64,49 +66,58 @@ class merge_stations_nta():
 			# ----------------- Some polygons have extra, unnecessary coords, taking the max of the list of subcoords eliminates errors -----------------
 			if nta['ntaname'] in polygon_errors:
 				for i in nta['the_geom']['coordinates']:
+					max_num_j = 0
 					for j in i:
-						max_num_j = len(j)
-						max_j = j
+						cur_j = len(j)
+						if cur_j > max_num_j:
+							max_num_j = cur_j
+							max_j = j
 				for k in max_j:
 					nta_multipolygon.append(k)
-			else:
+				nta_objects[nta['ntacode']]['the_geom'] = nta_multipolygon
+			elif nta['ntaname'] not in todo:
 				for i in nta['the_geom']['coordinates']:
 					for j in i:
 						for k in range(len(j)):
 							nta_multipolygon.append(j[k])
-			nta_objects[nta['ntacode']]['the_geom'] = nta_multipolygon
-			
-			for coord in nta_multipolygon:
-				neg_lat = coord[0]
-				pos_long = abs(coord[1])
-				if neg_lat < min_lat:
-					min_lat = neg_lat
-				if pos_long > max_long:
-					max_long = pos_long
+				nta_objects[nta['ntacode']]['the_geom'] = nta_multipolygon
 
-			nta_objects[nta['ntacode']]['position'] = [max_long, min_lat]
+			if nta['ntaname'] not in todo:
+				for coord in nta_multipolygon:
+					neg_lat = coord[0]
+					pos_long = abs(coord[1])
+					if neg_lat < min_lat:
+						min_lat = neg_lat
+					if pos_long > max_long:
+						max_long = pos_long
+
+				nta_objects[nta['ntacode']]['position'] = [max_long, min_lat]
 
 			for station in filtered_stations:
-				# ----------------- station coordinates come in form: (lat, long) as a string -----------------
-				# ----------------- retreive lat and long points, cast them to floats to be passed into point_inside_polygon function -----------------				
-				station_coordinates = station['Station Location']
-				lat_coord = ''
-				long_coord = ''
-				i = 1
-				while(station_coordinates[i] != ','):
-					lat_coord += station_coordinates[i]
-					i += 1
-				i += 2
-				while(station_coordinates[i] != ')'):
-					long_coord += station_coordinates[i]
-					i += 1
-				lat_coord = float(lat_coord)
-				long_coord = float(long_coord)
-				is_in_nta = point_inside_polygon(long_coord, lat_coord, nta_multipolygon)
+				lat_coord = station['Station Latitude']
+				long_coord = station['Station Longitude']
+				if nta['ntaname'] not in todo:
+					is_in_nta = point_inside_polygon(long_coord, lat_coord, nta_multipolygon)
+				else:
+					for i in nta['the_geom']['coordinates']:
+						for j in i:
+							if station['Station Name'] == 'Beach 105th St' and nta['ntacode'] == 'QN10':
+								is_in_nta = point_inside_polygon(long_coord, lat_coord, j)
+							is_in_nta = point_inside_polygon(long_coord, lat_coord, j)
+							if station['Station Name'] == 'Beach 105th St' and is_in_nta:
+								print(j)
+								print()
+								print(long_coord)
+								print(lat_coord)
+								print()
 				if is_in_nta:
 					nta_objects[nta['ntacode']]['stations'].append({
 						'station_name': station['Station Name']
 					})
+					if nta['ntaname'] in todo:
+						print(nta_objects[nta['ntacode']])
+						print()
+						print()
 
 		
 

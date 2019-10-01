@@ -12,7 +12,7 @@ from utils.helper_functions.lat_long_kmeans import run_lat_long_kmeans
 from utils.helper_functions.cons_sat import cons_sat
 
 def execute(zones, percent_max, percent_min, factor):
-    reads = ['mta.income_with_NTA_with_percentages']
+
     writes = ['mta.new_zone_fares']
     # ----------------- A k of 5 (5 zones) derived from error graph in kmeans file -----------------
     repo_name = writes[0]
