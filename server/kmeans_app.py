@@ -98,11 +98,9 @@ def execute(zones, percent_max, percent_min, factor):
             repo.create_collection(repo_name)
         repo[repo_name].insert_many(data_insert)
         repo.logout()
-        
+
         # ----------------- return a version of the data with polygons, so that data can be visualized -----------------
-        print(repo_name, "completed")
         return data_copy
 
     if (new_fares == 'unsat'):
-        print("Constraints Were Not Satisfied")
         return []

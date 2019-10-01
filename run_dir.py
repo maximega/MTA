@@ -11,7 +11,7 @@ parser.add_argument("-d", "--debug", nargs='+', help="allow user run only specif
 args = parser.parse_args()
 
 get_data_reads = set()
-merge_data_reads = set(['mta.census_income', 'mta.census_tracts', 'mta.neighborhoods', 'mta.population', 'mta.stations', 'mta.transportation_percentages'])
+merge_data_reads = set(['mta.census_income', 'mta.census_tracts', 'mta.neighborhoods', 'mta.population', 'mta.stations', 'mta.transportation_percentages', 'mta.q_train'])
 
 # ----------------- Extract the algorithm classes from the modules in the specified subdirectory -----------------
 subdir = args.contributor_folder

@@ -18,8 +18,6 @@ class merge_census_data():
         incomes = repo.mta.census_income
         tracts = repo.mta.census_tracts
 
-        repo.drop_collection('income_with_tracts')
-        repo.create_collection('income_with_tracts')
         # ----------------- Merge Census Tract info with AVG income per tract -----------------
         tract_with_income = {}
         i = 0 
