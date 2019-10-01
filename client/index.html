@@ -150,15 +150,11 @@
                         data[i]['polygon'] = [];
                         // neighborhood points were in a weird format, so this is just 
                         // flattening and getting into google maps format
-                        for(var j = 0; j < data[i]['geom']['coordinates'].length; j++){
-                          for(var k = 0; k < data[i]['geom']['coordinates'][j].length; k++){
-                            for(var x = 0; x < data[i]['geom']['coordinates'][j][k].length; x++){
-                              data[i]['polygon'].push({
-                                lat: data[i]['geom']['coordinates'][j][k][x][1],
-                                lng: data[i]['geom']['coordinates'][j][k][x][0]
-                              });
-                            }
-                          }
+                        for(var j = 0; j < data[i]['geom'].length; j++){
+                          data[i]['polygon'].push({
+                            lat: data[i]['geom'][j][1],
+                            lng: data[i]['geom'][j][0]
+                          });
                         }
                       }
                       for(var a = 0; a < data.length; a++){
@@ -167,9 +163,9 @@
                           paths: data[a]['polygon'],
                           strokeColor: 'gray',
                           strokeOpacity: 0.8,
-                          strokeWeight: 2,
+                          strokeWeight: 2.5,
                           fillColor: $scope.colors[data[a]['zone']-1],
-                          fillOpacity: 0.35,
+                          fillOpacity: 0.25,
                           name: data[a]['ntaname'],
                           routes: data[a]['routes'],
                           income: data[a]['income'],

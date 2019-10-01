@@ -25,9 +25,10 @@ def result():
     if factor == '':
         factor = 1.4
     data = execute(int(zones), float(percent_max), float(percent_min), float(factor))
+
     for x in data:
         x['_id'] = ""
-
+        
     res = app.response_class(
         response=json.dumps(data),
         status=200,
