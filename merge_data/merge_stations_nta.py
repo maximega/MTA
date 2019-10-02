@@ -24,7 +24,6 @@ class merge_stations_nta():
 		# ----------------- Neighborhoods that include multiple land masses -----------------
 		multi_shape = ['Pelham Bay-Country Club-City Island', 'Lenox Hill-Roosevelt Island', 'Breezy Point-Belle Harbor-Rockaway Park-Broad Channel']
 		# ----------------- Neighborhoods with extra/unecessary polygon points -----------------
-		#TODO: fix polygon error
 		polygon_errors = ['Lower East Side', 'Battery Park City-Lower Manhattan', 'Murray Hill-Kips Bay', 'Mott Haven-Port Morris', 'East Harlem North', 'Yorkville']
 		# ----------------- Q train extensions made in 2017 -----------------
 		extensions = ['72nd St', '86th St', '96th St']
@@ -75,7 +74,7 @@ class merge_stations_nta():
 				for k in max_j:
 					nta_multipolygon.append(k)
 				nta_objects[nta['ntacode']]['the_geom'] = nta_multipolygon
-			if nta['ntaname'] not in multi_shape:
+			elif nta['ntaname'] not in multi_shape:
 				for i in nta['the_geom']['coordinates']:
 					for j in i:
 						for k in range(len(j)):
@@ -95,7 +94,7 @@ class merge_stations_nta():
 			else:
 				for coord in nta_multipolygon:
 					total_lat += coord[0]
-					total_long += abs(coord[1])
+					total_long += coord[1]
 					count_points +=1
 
 			nta_objects[nta['ntacode']]['position'] = [total_long/count_points, total_lat/count_points]
