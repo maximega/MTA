@@ -24,7 +24,7 @@ class merge_income():
 			count_tracts = 0
 			total_income = 0
 			# ----------------- Exclude all tracts that have 0 population (airports, parks, prisons, cemetaries...) -----------------
-			if (neighborhood['ntaname'] != 'Airport' and 'park' not in neighborhood['ntaname'] and neighborhood['ntaname'] != 'Rikers Island'):
+			if (neighborhood['ntaname'] != 'Airport' and 'cemetery' not in neighborhood['ntaname'] and neighborhood['ntaname'] != 'Rikers Island'):
 				for income in incomes.find():
 					if neighborhood['ntacode'] == income['nta']:
 						count_tracts += 1
