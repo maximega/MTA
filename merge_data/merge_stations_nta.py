@@ -20,7 +20,6 @@ class merge_stations_nta():
 		ntas = repo.mta.neighborhoods.find()
 		q_train = repo.mta.q_train.find({"LINE" : "Q"})
 
-		#TODO: Fix Pelham Bay-Country Club-City Island, Lenox Hill-Roosevelt Island, Breezy Point-Belle Harbor-Rockaway Park-Broad Channel multi polygon representation
 		# ----------------- Neighborhoods that include multiple land masses -----------------
 		multi_shape = ['Pelham Bay-Country Club-City Island', 'Lenox Hill-Roosevelt Island', 'Breezy Point-Belle Harbor-Rockaway Park-Broad Channel']
 		# ----------------- Neighborhoods with extra/unecessary polygon points -----------------
