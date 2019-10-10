@@ -159,7 +159,6 @@
                       }
                       // create a new Polygon object with params and add it to the map
                       for(var a = 0; a < data.length; a++){
-                        //if nta happens to have multiple land masses, formatting is slightly different
                         for( var b = 0; b < data[a]['geom'].length; b++){
                           var neighborhood = new google.maps.Polygon({
                             paths: data[a]['geom'][b]['polygon'],
