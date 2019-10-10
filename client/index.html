@@ -144,58 +144,38 @@
                       }
                       $scope.showErr = false;
                       initialize();
-                      //nta's that have multiple land masses, and require multiple polygons
-                      var multi_shape = ['Pelham Bay-Country Club-City Island', 'Lenox Hill-Roosevelt Island', 'Breezy Point-Belle Harbor-Rockaway Park-Broad Channel'];
                       for(var i = 0; i < data.length; i++){
-                        //if nta happens to have multiple land masses, formatting is slightly different
-                        if (multi_shape.includes(data[i]['ntaname'])){
-                          for(var j = 0; j < data[i]['geom'].length; j++){
-                            data[i]['geom'][j]['polygon'] = [];
-                            for(var k = 0; k < data[i]['geom'][j].length; k++){
-                              for(var m = 0; m < data[i]['geom'][j][k].length; m++){
-                                data[i]['geom'][j]['polygon'].push({
-                                  lat: data[i]['geom'][j][k][m][1],
-                                  lng: data[i]['geom'][j][k][m][0]
-                                });
-                              }
-                            }  
-                          }
-                        }
-                        // neighborhood points were in a weird format, so this is just 
-                        // flattening and getting into google maps format
-                        else{
-                          data[i]['polygon'] = [];
-                          for(var j = 0; j < data[i]['geom'].length; j++){
-                            data[i]['polygon'].push({
-                              lat: data[i]['geom'][j][1],
-                              lng: data[i]['geom'][j][0]
-                            });
-                          }
+                        for(var j = 0; j < data[i]['geom'].length; j++){
+                          data[i]['geom'][j]['polygon'] = [];
+                          for(var k = 0; k < data[i]['geom'][j].length; k++){
+                            for(var m = 0; m < data[i]['geom'][j][k].length; m++){
+                              data[i]['geom'][j]['polygon'].push({
+                                lat: data[i]['geom'][j][k][m][1],
+                                lng: data[i]['geom'][j][k][m][0]
+                              });
+                            }
+                          }  
                         }
                       }
                       // create a new Polygon object with params and add it to the map
                       for(var a = 0; a < data.length; a++){
-                        //if nta happens to have multiple land masses, formatting is slightly different
-                        if (multi_shape.includes(data[a]['ntaname'])){
-                          for( var b = 0; b < data[a]['geom'].length; b++){
-                            var neighborhood = new google.maps.Polygon({
-                              paths: data[a]['geom'][b]['polygon'],
-                              strokeColor: 'gray',
-                              strokeOpacity: 0.8,
-                              strokeWeight: 2.5,
-                              fillColor: $scope.colors[data[a]['zone']-1],
-                              fillOpacity: 0.25,
-                              name: data[a]['ntaname'],
-                              routes: data[a]['routes'],
-                              income: data[a]['income'],
-                              avg_inc: data[a]['avg_inc']
-                            });
-                            neighborhood.setMap($scope.map);
-                            // click listener
-                            neighborhood.addListener('click', $scope.showDetails);
-                          }
+                        for( var b = 0; b < data[a]['geom'].length; b++){
+                          var neighborhood = new google.maps.Polygon({
+                            paths: data[a]['geom'][b]['polygon'],
+                            strokeColor: 'gray',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2.5,
+                            fillColor: $scope.colors[data[a]['zone']-1],
+                            fillOpacity: 0.25,
+                            name: data[a]['ntaname'],
+                            routes: data[a]['routes'],
+                            income: data[a]['income'],
+                            avg_inc: data[a]['avg_inc']
+                          });
+                          neighborhood.setMap($scope.map);
+                          // click listener
+                          neighborhood.addListener('click', $scope.showDetails);
                         }
-                        else{
                           var neighborhood = new google.maps.Polygon({
                             paths: data[a]['polygon'],
                             strokeColor: 'gray',
@@ -211,7 +191,6 @@
                           neighborhood.setMap($scope.map);
                           // click listener
                           neighborhood.addListener('click', $scope.showDetails);
-                        }
                       }
                       // on click popout init
                       $scope.infoWindow = new google.maps.InfoWindow;
